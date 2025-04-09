@@ -3,12 +3,14 @@ let gameId;
 let rows, cols;
 let board = [];
 let gameOver = false;
+let moves = 0;
 
 async function initGame() {
     const modal = document.getElementById('gameOverModal');
     modal.style.display = 'none';
     board = [];
     gameOver = false;
+    moves = 0;
     const response = await fetch(`${API_URL}/game`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -30,6 +32,7 @@ async function revealCell(row, col) {
         method: 'POST',
     });
     const data = await response.json();
+    moves++;
     if (data.gameOver) {
         gameOver = true;
         showGameOverModal();
@@ -75,13 +78,49 @@ async function toggleFlag(row, col) {
     const data = await response.json();
     updateBoard(data.board);
     updateFlagCount(data.flagCount);
+    moves++;
 
     if (data.flaggedMines === data.minesCount) {
         alert('Вы победили!');
+        await saveGameResult(true);
         board = [];
         initGame();
     }
 }
+
+async function saveGameResult(won) {
+    const remainingFlags = parseInt(document.getElementById('flagCount').textContent);
+
+    await fetch(`${API_URL}/results`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            playerName: 'Игрок', // можно заменить на input-поле
+            won,
+            moves,
+            remainingFlags,
+            timestamp: new Date().toISOString()
+        })
+    });
+
+    loadResults(); // обновляем список после сохранения
+}
+
+
+async function loadResults() {
+    const res = await fetch(`${API_URL}/results`);
+    const results = await res.json();
+    const list = document.getElementById('resultsList');
+    list.innerHTML = '';
+
+    results.slice().reverse().forEach(result => {
+        const li = document.createElement('li');
+        const date = new Date(result.timestamp).toLocaleString();
+        li.textContent = `${date} – ${result.won ? 'Победа 🎉' : 'Поражение 💥'} – Ходов: ${result.moves}, Флаги: ${result.remainingFlags}`;
+        list.appendChild(li);
+    });
+}
+
 
 function updateBoard(boardData, row, col) {
     for (let r = 0; r < rows; r++) {
@@ -118,6 +157,7 @@ function updateFlagCount(count) {
 }
 
 function showGameOverModal() {
+    saveGameResult(false);
     const modal = document.getElementById('gameOverModal');
     modal.style.display = 'flex';
 }
@@ -127,4 +167,14 @@ function closeModal() {
     modal.style.display = 'none';
 }
 
+document.getElementById("toggleResults").addEventListener("click", function () {
+    const panel = document.getElementById("results");
+    panel.classList.toggle("open");
+
+    this.textContent = (panel.classList.contains("open") ? "▼" : "▶") + " История игр";
+});
+
 window.onload = initGame;
+window.addEventListener('DOMContentLoaded', () => {
+    loadResults();
+});

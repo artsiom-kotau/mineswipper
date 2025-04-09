@@ -163,3 +163,56 @@ button:hover {
 .modal-content button:hover {
     background-color: #1d3557;
 }
+
+#results {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.accordion {
+    background-color: #457b9d;
+    color: white;
+    cursor: pointer;
+    padding: 10px 15px;
+    width: 100%;
+    border: none;
+    text-align: left;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    border-radius: 8px;
+    margin-bottom: 5px;
+}
+
+.accordion:hover {
+    background-color: #1d3557;
+}
+
+.panel {
+    padding: 0 10px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    background-color: #f1f1f1;
+    border-radius: 8px;
+}
+
+.panel.open {
+    padding: 10px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+#resultsList {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+#resultsList li {
+    padding: 5px;
+    margin-bottom: 4px;
+    background-color: #e6ecf0;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
